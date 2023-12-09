@@ -115,5 +115,55 @@ namespace BookStore.EndPoint.Controllers
                 return NotFound();
             }
         }
+        [HttpGet]
+        public IActionResult Details(long? Id)
+        {
+
+            if (Id == null || Id == 0)
+            {
+                return NotFound();
+            }
+            BookDetail obj = new BookDetail();
+
+            obj.Book = _db.Books.FirstOrDefault(u => u.Id == Id);
+            
+            //edit
+            if ( obj.Id!=0)
+            {
+
+                obj = _db.BookDetails.Include(p => p.Book).FirstOrDefault(p => p.Book.Id == Id);
+            }
+         
+
+            if (obj == null)
+            {
+                return NotFound();
+            }
+            return View(obj);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult>  Details(BookDetail bd)
+        {
+
+        
+            if (bd.Id==0)
+            {
+                bd.Id = 0;
+                //insert
+                bd.InsertTime = DateTime.Now;
+                bd.IsRemoved = false;
+                await _db.BookDetails.AddAsync(bd);
+            }
+            else
+            {
+                //update
+                 _db.BookDetails.Update(bd);
+            }
+            _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
