@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,6 +34,11 @@ namespace Persistence.Contexts
             //modelBuilder.Entity<Category>().HasData(new Category { Id = 2, CategoryName = nameof(ConstCategory.Food) });
 
             //modelBuilder.Entity<Category>().HasData(new Category { Id = 3, CategoryName = nameof(ConstCategory.Poshak) });
+
+            //modelBuilder.Entity<BookDetail>()
+            //.HasOne(a => a.Book)
+            //.WithOne(p => p.BookDetail)
+            //.HasForeignKey<BookDetail>(p => p.Book.Id);
 
             base.OnModelCreating(modelBuilder);
         }

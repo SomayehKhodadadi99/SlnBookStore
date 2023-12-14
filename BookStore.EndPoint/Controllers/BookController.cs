@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Contexts;
 
+using System;
+
 namespace BookStore.EndPoint.Controllers
 {
     public class BookController : Controller
@@ -13,30 +15,30 @@ namespace BookStore.EndPoint.Controllers
 
         public BookController(DataBaseContext context)
         {
-                _db = context;
+            _db = context;
         }
 
 
         public IActionResult Index()
         {
-            List<Book> lstbooks=_db.Books.Include(p=>p.Publisher).ToList();
+            List<Book> lstbooks = _db.Books.Include(p => p.Publisher).ToList();
             return View(lstbooks);
         }
         [HttpGet]
-        public  IActionResult Upsert(long? Id)
+        public IActionResult Upsert(long? Id)
         {
             Bookvw book = new Bookvw();
-             
+
 
             book.PublisherList = _db.Publishers.Select(p => new SelectListItem { Text = p.Name, Value = p.Id.ToString() }).ToList();
 
-         
-            if (Id==0 || Id==null)
+
+            if (Id == 0 || Id == null)
             {
                 //باید یه دراپ بسازم
                 //insert
 
-              
+
 
                 book.Book = new Book();
 
@@ -70,16 +72,16 @@ namespace BookStore.EndPoint.Controllers
         {
 
             //--------------------------------------
-             if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
-                if (book?.Id==0) 
+                if (book?.Id == 0)
                 {
                     //create
 
                     Book bookProxy = new Book();
-                    var result = await  _db.Books.AddAsync(book);
-                    
-                  
+                    var result = await _db.Books.AddAsync(book);
+
+
                 }
                 else
                 {
@@ -100,70 +102,80 @@ namespace BookStore.EndPoint.Controllers
 
 
                     //update
-                  
+
 
                 }
 
 
 
-               await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
-             else
+            else
             {
                 return NotFound();
             }
         }
-        [HttpGet]
-        public IActionResult Details(long? Id)
+
+        public IActionResult Details(int? id)
         {
+        
+            Book book = _db.Books.FirstOrDefault(d => d.Id == id);
 
-            if (Id == null || Id == 0)
+            if (book == null)
             {
                 return NotFound();
             }
-            BookDetail obj = new BookDetail();
-
-            obj.Book = _db.Books.FirstOrDefault(u => u.Id == Id);
-            
-            //edit
-            if ( obj.Id!=0)
+          
+            var viewModel = new BookDetailvw
             {
+                BookId = book.Id,
+                mybook = book,
+                BookDetail = new BookDetail()
+            };
 
-                obj = _db.BookDetails.Include(p => p.Book).FirstOrDefault(p => p.Book.Id == Id);
-            }
+            viewModel.BookDetail = _db.BookDetails.FirstOrDefault(x => x.Book.Id == id);
          
-
-            if (obj == null)
-            {
-                return NotFound();
-            }
-            return View(obj);
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult>  Details(BookDetail bd)
+        public IActionResult Details(BookDetailvw obj)
         {
+                if (obj.BookDetail.Id == 0) 
+                {
+                //create 
 
-        
-            if (bd.Id==0)
-            {
-                bd.Id = 0;
-                //insert
-                bd.InsertTime = DateTime.Now;
-                bd.IsRemoved = false;
-                await _db.BookDetails.AddAsync(bd);
-            }
-            else
-            {
-                //update
-                 _db.BookDetails.Update(bd);
-            }
-            _db.SaveChangesAsync();
+                var bookSelect=_db.Books.Where(p => p.Id == obj.BookId).FirstOrDefault();
 
-            return RedirectToAction(nameof(Index));
+                if (bookSelect != null)
+                {
+                obj.BookDetail.Book = bookSelect;
+                    
+              
+                   _db.BookDetails.Add(obj.BookDetail);
+                }
+           
+
+                }
+                else
+                {
+                //edit
+
+                Book bookFind = _db.Books.FirstOrDefault(d => d.Id == obj.BookId);
+
+
+                obj.BookDetail.Book = bookFind;
+                _db.BookDetails.Update(obj.BookDetail);
+
+                }
+                _db.SaveChanges();
+
+            return RedirectToAction("Index", new { id = obj.BookId });
+            // }
+
         }
     }
 }

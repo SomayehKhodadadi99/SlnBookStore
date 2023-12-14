@@ -20,6 +20,8 @@ namespace Domain.Entities
 
         public Book Book { get; set; }
 
-  
+        //public long BookId { get; set; }
+
+
     }
 }
