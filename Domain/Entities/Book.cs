@@ -24,7 +24,7 @@ namespace Domain.Entities
         public long PublisherId { get; set; }
         public Publisher Publisher { get; set; }
 
-        public ICollection<Author> Authors { get; set; }
+        public ICollection<AuthorBook> AuthorBooks { get; set; }
 
     }
 }

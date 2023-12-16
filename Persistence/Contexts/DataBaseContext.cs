@@ -25,6 +25,9 @@ namespace Persistence.Contexts
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<BookDetail> BookDetails { get; set; }
 
+        public DbSet<AuthorBook> AuthorBooks { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +37,10 @@ namespace Persistence.Contexts
             //modelBuilder.Entity<Category>().HasData(new Category { Id = 2, CategoryName = nameof(ConstCategory.Food) });
 
             //modelBuilder.Entity<Category>().HasData(new Category { Id = 3, CategoryName = nameof(ConstCategory.Poshak) });
+
+             modelBuilder.Entity<AuthorBook>().HasKey(x => new { x.AuthorId, x.BookId });
+
+            
 
             //modelBuilder.Entity<BookDetail>()
             //.HasOne(a => a.Book)

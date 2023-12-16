@@ -53,18 +53,6 @@ namespace BookStore.EndPoint.Controllers
             }
             return NotFound();
 
-
-
-            //book.Book=_db.Books.Include(p=>p.Publisher).First(p => p.Id == Id);
-
-
-            //if (book == null)
-            //{
-            //    return NotFound();    
-            //}
-            //return View(book);
-
-
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -91,18 +79,13 @@ namespace BookStore.EndPoint.Controllers
                     if (mybooks is not null)
                     {
                         mybooks.Title = book.Title;
-                        mybooks.Authors = book.Authors;
+                        //mybooks.Authors = book.Authors;
                         mybooks.PublisherId = book.PublisherId;
                         mybooks.ISBN = book.ISBN;
                         mybooks.Price = book.Price;
 
                         _db.Books.Update(mybooks);
                     }
-
-
-
-                    //update
-
 
                 }
 
@@ -177,5 +160,74 @@ namespace BookStore.EndPoint.Controllers
             // }
 
         }
+
+        [HttpGet]
+        public IActionResult ManageAuthors(long Id)
+        {
+
+            AuthorBookVM authorBook = new AuthorBookVM();
+
+            authorBook.BookAuthorList=_db.AuthorBooks.Include(p=>p.Author).Include(p=>p.Book).Where(x=>x.BookId==Id).ToList();
+
+          
+            authorBook.AuthorBook = new AuthorBook { BookId = Id };
+
+            authorBook.Book = _db.Books.FirstOrDefault(p => p.Id == Id);
+
+
+           List<long> AssignAuthor = authorBook.BookAuthorList.Select(p => p.AuthorId).ToList();
+
+            var tempList =_db.Authors.Where(p => !AssignAuthor.Contains(p.Id)).ToList();
+
+            authorBook.AuthorList = tempList.Select(x => new SelectListItem
+            {
+                Text = x.FullName,
+                Value = x.Id.ToString()
+            });
+
+            return View(authorBook);
+      
+        }
+
+
+        [HttpPost]
+        
+        public async Task<IActionResult> ManageAuthors(AuthorBook authorBook)
+        {
+
+            //--------------------------------------
+            if (authorBook.AuthorId!=0 && authorBook.BookId!=0)
+            {
+             
+
+                    AuthorBook bookProxy = new AuthorBook();
+                    var result = await _db.AuthorBooks.AddAsync(authorBook);
+
+
+
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction(nameof(ManageAuthors),new {@id=authorBook.BookId});
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        [HttpPost]
+        public IActionResult RemoveAuthors(long AuthorId,AuthorBookVM authorBook)
+        {
+            var bookId=authorBook.Book.Id;
+            AuthorBook au= _db.AuthorBooks.FirstOrDefault(p => p.AuthorId == AuthorId && p.BookId == bookId);
+
+            _db.AuthorBooks.Remove(au);
+
+            _db.SaveChanges();
+            return RedirectToAction(nameof(ManageAuthors), new { @id = bookId });
+        }
+
+
+
+
     }
 }
