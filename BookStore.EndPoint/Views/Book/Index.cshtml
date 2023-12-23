@@ -26,12 +26,10 @@
                     <th>Price</th>
                     <th>Publisher</th>
                     <th>Isbn</th>
-                    @*   <th>
-                Publisher
-                </th>
-                <th>
-                Authors
-                </th> *@
+                    <th>
+                        Authors
+                    </th>
+         
                     <th></th>
 
                 </tr>
@@ -47,33 +45,33 @@
                             @item.Publisher?.Name
                         </td>
                         <td>@item.ISBN</td>
-                        @*   <td>
-                @{
-                var authors = "";
-                }
-                @foreach (var auth in item.BookAuthorMap)
-                {
-                authors += @auth.Author.FullName + ", ";
-                }
-                @authors.Trim().TrimEnd(',')
-                </td> *@
-                        <td>
-                            <a class="btn btn-primary text-white" asp-action="Upsert" asp-route-Id="@item.Id">
-                                Edit
-                            </a>
-                            <a class="btn btn-info text-white" asp-action="Details" asp-route-Id="@item.Id">
-                                Add BookDetail
-                            </a>
-                            <a class="btn btn-danger text-white" asp-action="Delete" asp-route-Id="@item.Id">
-                                Delete
-                            </a>
-                            <a class="btn btn-success text-white" asp-action="ManageAuthors" asp-route-Id="@item.Id">
-                              Asign  Authors
-                            </a>
+                          <td>
+                                    @{
+                                    var authors = "";
+                                    }
+                                            @foreach (var auth in item.AuthorBooks)
+                                            {
+                                            authors += @auth.Author.FullName + ", ";
+                                            }
+                                    @authors.Trim().TrimEnd(',')
+                          </td>
+                                    <td>
+                                        <a class="btn btn-primary text-white" asp-action="Upsert" asp-route-Id="@item.Id">
+                                            Edit
+                                        </a>
+                                        <a class="btn btn-info text-white" asp-action="Details" asp-route-Id="@item.Id">
+                                            Add BookDetail
+                                        </a>
+                                        <a class="btn btn-danger text-white" asp-action="Delete" asp-route-Id="@item.Id">
+                                            Delete
+                                        </a>
+                                        <a class="btn btn-success text-white" asp-action="ManageAuthors" asp-route-Id="@item.Id">
+                                          Asign  Authors
+                                        </a>
 
-                        </td>
+                                    </td>
                     </tr>
-                }
+            }
             </table>
         }
         else
